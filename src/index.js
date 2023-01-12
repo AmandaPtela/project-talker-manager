@@ -1,5 +1,5 @@
 const express = require('express');
-const { getTalkers, getUser, gerarToken } = require('./helpers/helpers');
+const { getTalkers, gerarToken } = require('./helpers/helpers');
 
 const app = express();
 app.use(express.json());
@@ -18,18 +18,18 @@ app.get('/talker', async (_request, response) => {
     response.status(HTTP_OK_STATUS).json(talkers);
 });
 
-//Listar talker específico
+//  Listar talker específico
 app.get('/talker/:id', async (_request, response) => {
   const { id } = _request.params;
   const data = await getTalkers();
   const talker = data.find((i) => i.id === Number(id));
   if (!talker) {
-    response.status(404).json({message: 'Pessoa palestrante não encontrada'});
+    response.status(404).json({ message: 'Pessoa palestrante não encontrada' });
   }
   response.status(HTTP_OK_STATUS).json(talker);
 });
 
-//endpoint login
+//  endpoint login
 /* app.get('/login', (_request, response) => {
   const user = getUser();
   user.push(_request.body);
@@ -38,10 +38,10 @@ app.get('/talker/:id', async (_request, response) => {
 
 // Endpoind de token do login
 app.post('/login', (_request, response) => {
-  const user = getUser(_request.body);
+  //  const user = getUser(_request.body);
   response.status(200).json(
-    { token: gerarToken() }
-  )
+    { token: gerarToken() },
+  );
 });
 
 // adicionar talker

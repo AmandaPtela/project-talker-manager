@@ -13,18 +13,18 @@ async function getTalkers() {
     }
 }
 
-const getUser = (nome, email, password) => {
+const getUser = (/* nome, email, password */) => {
     const data = { 
-        'nome': nome,
-        'email': email,
-        'password': password,
-        'token': ''
-    }
+/*         nome: nome,
+        email: email,
+        password: password,
+        token: '', */
+    };
     return data;
-}
+};
 
 function gerarToken() {
-    let token = crypto.randomBytes(8).toString('hex');
+    const token = crypto.randomBytes(8).toString('hex');
     return token;
 }
 
