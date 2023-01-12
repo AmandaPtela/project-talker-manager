@@ -13,15 +13,14 @@ async function getTalkers() {
     }
 }
 
-async function getUser() {
-    try {
-        const data = { 'email': '', 'password': '', 'token': ''}
-        const users = JSON.parse(data);
-        return users;
-    } catch (error) {
-        console.error(`Erro na leitura do arquivo: ${error}`);
-        return [];
+const getUser = (nome, email, password) => {
+    const data = { 
+        'nome': nome,
+        'email': email,
+        'password': password,
+        'token': ''
     }
+    return data;
 }
 
 function gerarToken() {
