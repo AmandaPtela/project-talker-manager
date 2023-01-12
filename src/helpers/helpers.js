@@ -1,5 +1,6 @@
+const crypto = require('crypto');
+
 const fs = require('fs').promises;
-const path = require('path');
 
 async function getTalkers() {
     try {
@@ -12,6 +13,24 @@ async function getTalkers() {
     }
 }
 
+async function getUser() {
+    try {
+        const data = { 'email': '', 'password': '', 'token': ''}
+        const users = JSON.parse(data);
+        return users;
+    } catch (error) {
+        console.error(`Erro na leitura do arquivo: ${error}`);
+        return [];
+    }
+}
+
+function gerarToken() {
+    let token = crypto.randomBytes(8).toString('hex');
+    return token;
+}
+
 module.exports = {
     getTalkers,
+    getUser,
+    gerarToken,
 };

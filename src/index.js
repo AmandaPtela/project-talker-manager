@@ -1,5 +1,5 @@
 const express = require('express');
-const { getTalkers } = require('./helpers/helpers');
+const { getTalkers, getUser, gerarToken } = require('./helpers/helpers');
 
 const app = express();
 app.use(express.json());
@@ -27,8 +27,15 @@ app.get('/talker/:id', async (_request, response) => {
     response.status(404).json({message: 'Pessoa palestrante não encontrada'});
   }
   response.status(HTTP_OK_STATUS).json(talker);
-
 });
+
+// Endpoind de login
+app.post('/login', (_request, response) => {
+  response.status(200).json({ token: gerarToken() })
+});
+/*   const user = getUser(_request.body);
+  user.push(_request.body); */
+  /* response.status(HTTP_OK_STATUS).json({'token': gerarToken()}) */
 
 // adicionar talker
 /* app.post('/talkerAdd', (_request, response) => {
