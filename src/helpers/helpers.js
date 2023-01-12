@@ -3,7 +3,7 @@ const path = require('path');
 
 async function getTalkers() {
     try {
-        const data = await fs.readFile(path.resolve(__dirname, '../talker.json'));
+        const data = await fs.readFile('./src/talker.json', 'utf-8');
         const talkers = JSON.parse(data);
         return talkers;
     } catch (error) {

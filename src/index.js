@@ -18,6 +18,18 @@ app.get('/talker', async (_request, response) => {
     response.status(HTTP_OK_STATUS).json(talkers);
 });
 
+//Listar talker específico
+app.get('/talker/:id', async (_request, response) => {
+  const { id } = _request.params;
+  const data = await getTalkers();
+  const talker = data.find((i) => i.id === Number(id));
+  if (!talker) {
+    response.status(404).json({message: 'Pessoa palestrante não encontrada'});
+  }
+  response.status(HTTP_OK_STATUS).json(talker);
+
+});
+
 // adicionar talker
 /* app.post('/talkerAdd', (_request, response) => {
   const talkers = require('./talker.json');
