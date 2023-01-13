@@ -7,6 +7,29 @@ app.use(express.json());
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
 
+const fs = require('fs').promises;
+
+const readFile = async (path) => {
+    try {
+        const data = await fs.readFile(path);
+        return JSON.parse(data);
+    } catch (error) {
+        console.log(error.message);
+    }
+};
+
+const writeFile = async (path, data) => {
+    try {
+        await fs.writeFile(path, JSON.stringify(data, null, 2));
+    } catch (error) {
+        console.log(error.message);
+    }
+};
+
+module.exports = {
+    readFile,
+    writeFile,
+};
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send('ok');
@@ -64,12 +87,83 @@ app.post('/login', validation, (_request, _response) => {
 });
 
 // adicionar talker
-/* app.post('/talker', (_request, response) => {
-  const talkers = require('./talker.json');
-  talkers.push(_request.body);
-  response.status(HTTP_OK_STATUS).json({talkers});
-}); */
+const auth = (_request, response, next) => {
+  const { authorization } = _request.headers;
+  if (!authorization) {
+    return response.status(401).json({ message: 'Token não encontrado' });
+  }
+  if (authorization.length !== 16 || typeof authorization !== 'string') {
+    return response.status(401).json({ message: 'Token inválido' });
+  }
+  next();
+};
 
+const nameOk = (_request, response, next) => {
+  const { name } = _request.body;
+    if (!name) {
+      return response.status(400).json({ message: 'O campo "name" é obrigatório' });
+    }
+    if (name.length < 3) {
+      return response.status(400).json({ message: 'O "name" deve ter pelo menos 3 caracteres' });
+    }
+  next();
+};
+
+const ageOk = (_request, response, next) => {
+  const { age } = _request.body;
+    if (!age) {
+      return response.status(400).json({ message: 'O campo "age" é obrigatório' });
+    }
+    if (age < 18) {
+      return response.status(400).json({ message: 'A pessoa palestrante deve ser maior de idade' });
+    }
+  next();
+};
+
+const talkOk = (_request, response, next) => {
+  const { talk } = _request.body;
+  if (!talk) {
+    return response.status(400).json({ message: 'O campo "talk" é obrigatório' });
+  }
+  next();
+};
+
+const talkKeys = (_request, response, next) => {
+  const { talk } = _request.body;
+  const { watchedAt, rate} = talk;
+  const regexData = /\d{2}\/\d{2}\/\d{4}/gm;
+  const regexRate = /^[1-5]\d{0,5}$/;
+  const rateN = Number(rate);
+
+  if (!watchedAt) {
+    return response.status(400).json({ message: 'O campo "watchedAt" é obrigatório' });
+  }
+  if (!regexData.test(watchedAt)) {
+    return response.status(400).json({ message: 'O campo \"watchedAt\" deve ter o formato "dd/mm/aaaa"' });
+  }
+  if (!rate) {
+    return response.status(400).json({ message: 'O campo "rate" é obrigatório' });
+  }
+  if (typeof rateN !== 'number') {
+    return response.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
+  }
+  if (regexRate.test(rateN)) {
+    return response.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
+  }
+  if (!rateN < 9) {
+    return response.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
+  }
+  next();
+}
+
+  app.post('/talker', auth, nameOk, ageOk, talkOk, talkKeys, async (_request, response) => {
+    const talkers = getTalkers();
+    const { name } = _request.body;
+    const listaAtualizada = talkers.push(_request.body);
+    const last = listaAtualizada.find((t) => t.name === name);
+
+    return response.status(201).json(last);
+  });
 app.listen(PORT, () => {
   console.log('Online agora');
 });
