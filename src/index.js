@@ -157,12 +157,9 @@ const talkKeys = (_request, response, next) => {
 }
 
   app.post('/talker', auth, nameOk, ageOk, talkOk, talkKeys, async (_request, response) => {
-    const talkers = getTalkers();
-    const { name } = _request.body;
-    const listaAtualizada = talkers.push(_request.body);
-    const last = listaAtualizada.find((t) => t.name === name);
+    const newTalker = _request.body;
 
-    return response.status(201).json(last);
+    return response.status(201).json(newTalker);
   });
 app.listen(PORT, () => {
   console.log('Online agora');
