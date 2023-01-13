@@ -40,27 +40,27 @@ app.get('/talker/:id', async (_request, response) => {
 const validation = (_request, response, next) => {
   const regexEmail = /^\S+@\S+\.\S+$/;
   const { email, password } = _request.body;
-  if(!email) {
+  if (!email) {
     return response.status(400).json({ message: 'O campo "email" é obrigatório' });
   }
   if (!regexEmail.test(email)) {
     return response.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
   }
-  if(!password) {
+  if (!password) {
     return response.status(400).json({ message: 'O campo "password" é obrigatório' });
   }
   
-  if(password.length < 6) {
+  if (password.length < 6) {
     return response.status(400).json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
   }
   next();
-}
+};
 
 // Endpoind de token do login
 app.post('/login', validation, (_request, _response) => {
   const token = gerarToken();
 
-  return _response.status(HTTP_OK_STATUS).json({ token })
+  return _response.status(HTTP_OK_STATUS).json({ token });
 });
 
 // adicionar talker
