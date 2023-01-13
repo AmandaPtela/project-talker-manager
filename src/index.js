@@ -34,18 +34,37 @@ app.get('/talker/:id', async (_request, response) => {
   const user = getUser();
   user.push(_request.body);
   response.status(HTTP_OK_STATUS).json(user,{'token': gerarToken()})
-}); */
+}); */ 
+
+// validações
+const validation = (_request, response, next) => {
+  const regexEmail = /^\S+@\S+\.\S+$/;
+  const { email, password } = _request.body;
+  if(!email) {
+    return response.status(400).json({ message: 'O campo "email" é obrigatório' });
+  }
+  if (!regexEmail.test(email)) {
+    return response.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
+  }
+  if(!password) {
+    return response.status(400).json({ message: 'O campo "password" é obrigatório' });
+  }
+  
+  if(password.length < 6) {
+    return response.status(400).json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
+  }
+  next();
+}
 
 // Endpoind de token do login
-app.post('/login', (_request, response) => {
-  //  const user = getUser(_request.body);
-  response.status(200).json(
-    { token: gerarToken() },
-  );
+app.post('/login', validation, (_request, _response) => {
+  const token = gerarToken();
+
+  return _response.status(HTTP_OK_STATUS).json({ token })
 });
 
 // adicionar talker
-/* app.post('/talkerAdd', (_request, response) => {
+/* app.post('/talker', (_request, response) => {
   const talkers = require('./talker.json');
   talkers.push(_request.body);
   response.status(HTTP_OK_STATUS).json({talkers});
