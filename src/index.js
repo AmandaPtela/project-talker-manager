@@ -198,6 +198,19 @@ app.put('/talker/:id', auth, nameOk, ageOk, talkOk,
   await fs.writeFile(path, JSON.stringify([newTalk]));
   response.status(200).json(newTalk);
 });
+
+app.delete('/talker/:id', auth, async (_request, response) => {
+  const id = Number(_request.params.id);
+  const path = 'src/talker.json';
+  const talkers = await getTalkers();
+
+  const select = Object.values(talkers);
+  const semTalker = select.filter((t) => t.id !== id);
+
+  await fs.writeFile(path, JSON.stringify([semTalker]));
+  response.status(204).json(semTalker);
+});
+
 app.listen(PORT, () => {
   console.log('Online agora');
 });
