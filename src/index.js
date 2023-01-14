@@ -120,7 +120,7 @@ const talkKeys = (_request, response, next) => {
   }
   next();
 };
-
+const errorM = 'O campo "rate" deve ser um inteiro de 1 à 5'; 
 const rateOk = (_request, response, next) => {
   const { talk } = _request.body;
   const { rate } = talk;
@@ -130,9 +130,36 @@ const rateOk = (_request, response, next) => {
     return response.status(400).json({ message: 'O campo "rate" é obrigatório' });
   }
   if (!Number.isInteger(rateN)) {
-    return response.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
+    return response.status(400).json({ message: `${errorM}` });
   }
   if (rateN < 1 || rateN > 5) {
+    return response.status(400).json({ message: `${errorM}` });
+  }
+  next();
+};
+
+const rateOkPUT = (_request, response, next) => {
+  const { talk } = _request.body;
+  const { rate } = talk;
+  const rateN = Number(rate);
+  // const regexRate = /^[1-5]\d{0,5}$/;
+  if (rateN < 1) {
+    return response.status(400).json({ message: `${errorM}` });
+  }
+  if (rateN > 5) {
+    return response.status(400).json({ message: `${errorM}` });
+  }
+  if (!rateN) {
+    return response.status(400).json({ message: 'O campo "rate" é obrigatório' });
+  }
+  next();
+};
+
+const rateOkPUT2 = (_request, response, next) => {
+  const { talk } = _request.body;
+  const { rate } = talk;
+  const rateN = Number(rate);
+  if (!Number.isInteger(rateN)) {
     return response.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
   }
   next();
@@ -152,6 +179,24 @@ app.post('/talker', auth, nameOk, ageOk, talkOk, talkKeys, rateOk, async (_reque
   if (reqBody) {
     return response.status(201).json(newTalker);
   }
+});
+
+app.put('/talker/:id', auth, nameOk, ageOk, talkOk,
+ talkKeys, rateOkPUT, rateOkPUT2, async (_request, response) => {
+  const reqBody = _request.body;
+  const id = Number(_request.params.id);
+  const path = 'src/talker.json';
+  const talkers = await getTalkers();
+
+  const select = Object.values(talkers)/* ((t) => t.id === id) */;
+  const print = select.find((t) => t.id === id);
+  
+  const newTalk = {
+    id: print.id,
+    ...reqBody,
+  };
+  await fs.writeFile(path, JSON.stringify([newTalk]));
+  response.status(200).json(newTalk);
 });
 app.listen(PORT, () => {
   console.log('Online agora');
