@@ -7,29 +7,6 @@ app.use(express.json());
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
 
-const fs = require('fs').promises;
-
-const readFile = async (path) => {
-    try {
-        const data = await fs.readFile(path);
-        return JSON.parse(data);
-    } catch (error) {
-        console.log(error.message);
-    }
-};
-
-const writeFile = async (path, data) => {
-    try {
-        await fs.writeFile(path, JSON.stringify(data, null, 2));
-    } catch (error) {
-        console.log(error.message);
-    }
-};
-
-module.exports = {
-    readFile,
-    writeFile,
-};
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send('ok');
@@ -130,18 +107,25 @@ const talkOk = (_request, response, next) => {
 
 const talkKeys = (_request, response, next) => {
   const { talk } = _request.body;
-  const { watchedAt, rate} = talk;
+  const { watchedAt } = talk;
   const regexData = /\d{2}\/\d{2}\/\d{4}/gm;
-  const regexRate = /^[1-5]\d{0,5}$/;
-  const rateN = Number(rate);
-
+  
   if (!watchedAt) {
     return response.status(400).json({ message: 'O campo "watchedAt" é obrigatório' });
   }
   if (!regexData.test(watchedAt)) {
-    return response.status(400).json({ message: 'O campo \"watchedAt\" deve ter o formato "dd/mm/aaaa"' });
+    return response.status(400)
+    .json({ message: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"' });
   }
-  if (!rate) {
+  next();
+};
+
+const rateOk = (_request, response, next) => {
+  const { talk } = _request.body;
+  const { rate } = talk;
+  const regexRate = /^[1-5]\d{0,5}$/;
+  const rateN = Number(rate);
+    if (!rate) {
     return response.status(400).json({ message: 'O campo "rate" é obrigatório' });
   }
   if (typeof rateN !== 'number') {
@@ -153,12 +137,11 @@ const talkKeys = (_request, response, next) => {
   if (!rateN < 9) {
     return response.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
   }
-  next();
-}
+    next();
+};
 
-  app.post('/talker', auth, nameOk, ageOk, talkOk, talkKeys, async (_request, response) => {
+  app.post('/talker', auth, nameOk, ageOk, talkOk, talkKeys, rateOk, async (_request, response) => {
     const newTalker = _request.body;
-
     return response.status(201).json(newTalker);
   });
 app.listen(PORT, () => {
