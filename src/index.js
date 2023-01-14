@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs').promises;
 const { getTalkers, gerarToken } = require('./helpers/helpers');
 
 const app = express();
@@ -37,7 +38,7 @@ app.get('/talker/:id', async (_request, response) => {
 }); */ 
 
 // validações
-const validation = (_request, response, next) => {
+const validationLogin = (_request, response, next) => {
   const regexEmail = /^\S+@\S+\.\S+$/;
   const { email, password } = _request.body;
   if (!email) {
@@ -57,13 +58,13 @@ const validation = (_request, response, next) => {
 };
 
 // Endpoind de token do login
-app.post('/login', validation, (_request, _response) => {
+app.post('/login', validationLogin, (_request, _response) => {
   const token = gerarToken();
 
   return _response.status(HTTP_OK_STATUS).json({ token });
 });
 
-// adicionar talker
+// validações talker
 const auth = (_request, response, next) => {
   const { authorization } = _request.headers;
   if (!authorization) {
@@ -123,27 +124,35 @@ const talkKeys = (_request, response, next) => {
 const rateOk = (_request, response, next) => {
   const { talk } = _request.body;
   const { rate } = talk;
-  const regexRate = /^[1-5]\d{0,5}$/;
+  // const regexRate = /^[1-5]\d{0,5}$/;
   const rateN = Number(rate);
-    if (!rate) {
+  if (!rate) {
     return response.status(400).json({ message: 'O campo "rate" é obrigatório' });
   }
-  if (typeof rateN !== 'number') {
+  if (!Number.isInteger(rateN)) {
     return response.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
   }
-  if (regexRate.test(rateN)) {
+  if (rateN < 1 || rateN > 5) {
     return response.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
   }
-  if (!rateN < 9) {
-    return response.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
-  }
-    next();
+  next();
 };
+// criação de talker
+app.post('/talker', auth, nameOk, ageOk, talkOk, talkKeys, rateOk, async (_request, response) => {
+  const reqBody = _request.body;
+  const talkers = await getTalkers();
+  const path = 'src/talker.json';
+  
+  const addId = talkers.length + 1;
+  const newTalker = { id: addId, ...reqBody };
+  /* const attList = JSON.stringify(newTalker}); */
+  talkers.push(newTalker);
 
-  app.post('/talker', auth, nameOk, ageOk, talkOk, talkKeys, rateOk, async (_request, response) => {
-    const newTalker = _request.body;
+  await fs.writeFile(path, JSON.stringify(talkers));
+  if (reqBody) {
     return response.status(201).json(newTalker);
-  });
+  }
+});
 app.listen(PORT, () => {
   console.log('Online agora');
 });
