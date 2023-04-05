@@ -1,4 +1,4 @@
-  <strong> Talker Manager API  </strong><br />
+  <strong> Talker Manager </strong><br />
 
 Projeto de `backend` que consiste na construção de uma aplicação de cadastro de talkers (palestrantes), onde é possível fazer a criação, escrita, atualização e exclusão (CRUD) de um palestrante.
 
